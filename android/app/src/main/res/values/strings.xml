@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Japplan</string>
+    <string name="title_activity_main">Japplan</string>
+    <string name="package_name">com.pdcaux.japplan</string>
+    <string name="custom_url_scheme">com.pdcaux.japplan</string>
+</resources>

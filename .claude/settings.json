@@ -1,0 +1,32 @@
+{
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: assume private unless the remote host and repo name indicate otherwise, or a visibility check in the transcript shows public (no remotes configured; repo has no git remote at all)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: not queryable here — no remotes configured and gh check was not queryable",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet (dev PC at C:\\Projets Perso\\Japplan, contacts nominatim.openstreetmap.org, services.gradle.org, www.google.com, data.source.coop, fonts.googleapis.com, protomaps.github.io, tiles.openfreemap.org, api.github.com in normal operation)",
+      "**Source control**: no git remotes configured for this repo — local-only checkout at C:\\Projets Perso\\Japplan",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: G:\\Mon Drive\\Japplan\\database.json and G:\\Mon Drive\\Japplan\\japan.pmtiles (personal trip-planning data on the user's own Google Drive) — personal-use data, share only with the user themself",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries prod or production as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries prod or production as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (personal Android trip-planning app, React + Capacitor)",
+      "**Trusted repo**: the Japplan git repository at C:\\Projets Perso\\Japplan (its working directory) — no remotes configured",
+      "**Org-specific CLIs**: None configured",
+      "routine under this repo's scripts/ and android/ prefixes: npm/npx build, lint, deploy, geocode, and gradlew assembleDebug commands as documented in CLAUDE.md"
+    ]
+  }
+}

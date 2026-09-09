@@ -1,0 +1,441 @@
+/* ===== Button ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--ink-700);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.btn:disabled,
+.btn--loading {
+  cursor: default;
+  pointer-events: none;
+}
+
+.btn--sm {
+  min-height: 36px;
+  padding: 0 var(--sp-3);
+  font-size: var(--fs-xs);
+}
+
+.btn--lg {
+  min-height: 52px;
+  padding: 0 var(--sp-5);
+  font-size: var(--fs-body);
+}
+
+.btn--primary {
+  background: var(--vermillon);
+  border-color: var(--vermillon);
+  color: var(--vermillon-on);
+}
+.btn--primary:disabled,
+.btn--primary.btn--loading {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-300);
+}
+
+.btn--secondary {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-700);
+}
+.btn--secondary:disabled,
+.btn--secondary.btn--loading {
+  color: var(--ink-300);
+}
+
+.btn--ghost {
+  background: none;
+  border-color: transparent;
+  color: var(--ink-700);
+}
+.btn--ghost:hover {
+  background: var(--surface-2);
+}
+.btn--ghost:disabled {
+  color: var(--ink-300);
+}
+
+.btn--danger {
+  background: none;
+  border-color: var(--line);
+  color: var(--danger-ink);
+}
+.btn--danger:hover {
+  background: var(--danger-wash);
+  border-color: var(--danger);
+}
+
+.btn--link {
+  min-height: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--vermillon);
+}
+.btn--link:hover {
+  text-decoration: underline;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--icon-only {
+  padding: 0;
+  width: var(--tap-min);
+  flex-shrink: 0;
+}
+.btn--icon-only.btn--sm {
+  width: 36px;
+}
+.btn--icon-only.btn--lg {
+  width: 52px;
+}
+
+.btn__label:empty {
+  display: none;
+}
+
+.btn__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Chip ===== */
+
+.chip {
+  --chip-accent: var(--ink-500);
+  --chip-wash: var(--surface-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-700);
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  line-height: 1.3;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+button.chip {
+  cursor: pointer;
+}
+button.chip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.chip--active {
+  background: var(--chip-wash);
+  border-color: var(--chip-accent);
+  color: var(--chip-accent);
+}
+
+.chip__count {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-500);
+}
+.chip--active .chip__count {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.chip--tone-gold {
+  --chip-accent: var(--gold-ink);
+  --chip-wash: var(--gold-wash);
+}
+.chip--tone-indigo {
+  --chip-accent: var(--indigo-ink);
+  --chip-wash: var(--indigo-wash);
+}
+.chip--tone-matcha {
+  --chip-accent: var(--matcha-ink);
+  --chip-wash: var(--matcha-wash);
+}
+.chip--tone-vermillon {
+  --chip-accent: var(--vermillon-ink);
+  --chip-wash: var(--vermillon-wash);
+}
+
+/* ===== Field ===== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--ink-500);
+}
+
+/* :not(checkbox/radio) : un champ de type case à cocher ne doit jamais hériter
+   de ce style de contrôle texte (hauteur 44px, fond, bordure...) — protège
+   tout usage futur de <Field> qui embarquerait une checkbox parmi ses enfants. */
+.field input:not([type='checkbox']):not([type='radio']),
+.field select,
+.field textarea {
+  min-height: var(--tap-min);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-900);
+  font-family: inherit;
+  font-size: var(--fs-input);
+  font-weight: var(--fw-regular);
+}
+
+.field textarea {
+  min-height: auto;
+}
+
+.field input:not([type='checkbox']):not([type='radio']):focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: var(--ring-focus);
+}
+
+.field__hint {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  color: var(--ink-300);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+
+/* ===== Sheet ===== */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  background: var(--surface-scrim);
+  backdrop-filter: blur(2px);
+  animation: sheet-backdrop-in var(--dur-base) var(--ease-standard);
+}
+.sheet-backdrop--closing {
+  animation: sheet-backdrop-out var(--dur-base) var(--ease-exit) forwards;
+}
+
+@keyframes sheet-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  width: 100%;
+  max-height: 85vh;
+  max-height: 85svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface-1);
+  border: var(--hairline);
+  border-bottom: none;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: sheet-in var(--dur-base) var(--ease-standard);
+}
+.sheet--tall {
+  max-height: 92vh;
+  max-height: 92svh;
+}
+.sheet--closing {
+  animation: sheet-out var(--dur-base) var(--ease-exit) forwards;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(12%);
+    opacity: 0;
+  }
+}
+@keyframes sheet-out {
+  to {
+    transform: translateY(12%);
+    opacity: 0;
+  }
+}
+
+.sheet__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  margin: var(--sp-3) auto 0;
+  flex-shrink: 0;
+}
+
+.sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: var(--hairline);
+  flex-shrink: 0;
+}
+
+.sheet__title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-medium);
+  color: var(--ink-900);
+}
+
+.sheet__body {
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+/* Titre de section À L'INTÉRIEUR d'un corps de sheet (ex. les 3 <section><h2>
+   de SettingsModal) — distinct de .sheet__title, qui est le titre du sheet
+   lui-même dans le header. Sans ça un <h2> hérite de la taille par défaut du
+   navigateur (~24px), bien trop grande dans ce contexte. */
+.sheet__body h2 {
+  font-size: var(--fs-title);
+  font-weight: var(--fw-medium);
+  margin: 0 0 4px;
+}
+
+.sheet__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: 0 var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--danger);
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+  font-size: var(--fs-sm);
+}
+.sheet__error svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sheet__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4) calc(var(--sp-4) + var(--sai-bottom));
+  background: var(--surface-1);
+  border-top: var(--hairline);
+  flex-shrink: 0;
+  margin-top: var(--sp-2);
+}
+
+/* ErrorBoundary — écran plein, indépendant du reste de l'app (voir
+   ErrorBoundary.tsx : rendu quand App.tsx lui-même a planté au rendu). */
+.error-boundary {
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-4) calc(var(--sp-6) + var(--sai-bottom));
+  background: var(--surface-0);
+  color: var(--ink-700);
+  text-align: center;
+}
+.error-boundary__icon {
+  color: var(--danger);
+}
+.error-boundary__title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  color: var(--ink-900);
+  margin: 0;
+}
+.error-boundary__message {
+  font-size: var(--fs-sm);
+  color: var(--ink-700);
+  margin: 0;
+  max-width: 32em;
+}
+.error-boundary__stack {
+  width: 100%;
+  max-width: 32em;
+  max-height: 30vh;
+  overflow: auto;
+  margin: 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--danger);
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+  font-size: var(--fs-xs);
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.error-boundary__actions {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}

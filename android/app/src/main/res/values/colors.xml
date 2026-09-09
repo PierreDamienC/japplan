@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fond peint derrière la WebView (rotation, ouverture du clavier, transitions système).
+         Volontairement clair et unique : pas de values-night/, sinon le fond natif suivrait
+         l'OS alors que l'app expose un choix manuel Auto/Clair/Sombre. Le liseré n'est
+         visible qu'en transition, le header et la tab bar le recouvrant ensuite. -->
+    <color name="appBackground">#F4F1EA</color>
+</resources>

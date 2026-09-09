@@ -1,0 +1,36 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Trip itinerary data (hotels, exact dates, activity lists, and the
+# STAGE_ID_BY_GROUP tables that spell out every region/day-trip destination
+# visited) — kept locally only, never in git history (repo may go public).
+# See CLAUDE.md ("Release-time bulk import") for how these feed the
+# Drive-hosted database.json.
+PROGRESS.md
+scripts/migrate-database.mjs
+scripts/build-activities.mjs
+scripts/migrate-activities-to-json.mjs
+data/activities-sources/*.csv
+data/activities-coordinates.json

@@ -1,0 +1,1585 @@
+.app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__header {
+  padding: calc(12px + var(--sai-top)) 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.app__header h1 {
+  font-size: 18px;
+}
+
+.app__trip-picker {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app__trip-picker select {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-h);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.app__trip-picker--empty {
+  font-size: 13px;
+  color: var(--ink-500);
+}
+
+.app__trip-picker-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.offline-map-icon-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Sauvegarde échouée (voir saveError, useDatabase.ts) : le ⚙ porte l'alerte
+   plutôt qu'une bannière séparée — le détail et le "Réessayer" sont dans
+   SettingsModal. */
+.offline-map-icon-btn--alert {
+  border-color: var(--danger);
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+}
+
+.app__content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app__loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-500);
+}
+
+.map-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+.map-filter-btn {
+  position: absolute;
+  left: var(--sp-2);
+  bottom: var(--sp-2);
+  z-index: 5;
+  background: var(--surface-1);
+  box-shadow: var(--elev-fab);
+}
+
+.tab-bar {
+  flex-shrink: 0;
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding-bottom: var(--sai-bottom);
+}
+
+.tab-bar__button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tab-bar__button--active {
+  color: var(--accent);
+}
+
+/* Timeline — spine verticale (Planning "par étape") */
+
+.spine {
+  height: 100%;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.spine__item {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  column-gap: var(--sp-3);
+}
+
+.spine__rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.spine__rail::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  bottom: calc(var(--sp-3) * -1);
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.spine__item:first-child .spine__rail::before {
+  top: 13px;
+}
+
+.spine__item:last-child .spine__rail::before {
+  bottom: auto;
+  height: 13px;
+}
+
+.spine__node {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink-900);
+  border: none;
+  color: var(--surface-1);
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.spine__item--current .spine__node {
+  background: var(--vermillon);
+  color: var(--vermillon-on);
+}
+
+.spine__node--leg {
+  width: 22px;
+  height: 22px;
+  margin-top: 5px;
+  background: var(--surface-0);
+  border: 1.5px solid var(--node-color, var(--line-strong));
+  color: var(--node-color, var(--line-strong));
+}
+
+.spine__leg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 6px 0;
+  flex-wrap: wrap;
+}
+
+.spine__leg-label {
+  font-size: var(--fs-sm);
+  color: var(--ink-700);
+}
+
+.spine__leg-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.stage-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  background: var(--surface-1);
+  cursor: pointer;
+}
+
+.stage-card:active {
+  opacity: 0.85;
+}
+
+.stage-card--current {
+  border-color: var(--vermillon);
+  outline: 1.5px solid var(--vermillon);
+  outline-offset: -1px;
+}
+
+.stage-card--focused {
+  border-color: var(--indigo);
+  outline: 1.5px solid var(--indigo);
+  outline-offset: -1px;
+}
+
+.stage-card__header {
+  margin-bottom: var(--sp-3);
+}
+
+.stage-card__header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.stage-card__header h2 {
+  flex: 1;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: var(--fw-semibold);
+}
+
+.stage-card__subtitle {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-card--departure {
+  cursor: default;
+}
+
+.stage-card--departure .stage-card__header {
+  margin-bottom: var(--sp-1);
+}
+
+.stage-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  padding: 4px 0;
+  flex-wrap: wrap;
+}
+
+.stage-card__row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.stage-card__add-btn {
+  align-self: flex-start;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--vermillon);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  display: block;
+}
+
+.stage-card__add-btn--stage {
+  width: 100%;
+  padding: var(--sp-3);
+  text-align: center;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  color: var(--ink-500);
+  font-weight: var(--fw-medium);
+}
+
+.stage-card__section {
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+
+.stage-card__section--gold {
+  background: var(--gold-wash);
+}
+
+.stage-card__section--indigo {
+  background: var(--indigo-wash);
+}
+
+.stage-card__section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  margin-bottom: var(--sp-1);
+}
+
+.stage-card__section--gold .stage-card__section-label {
+  color: var(--gold-ink);
+}
+
+.stage-card__section--indigo .stage-card__section-label {
+  color: var(--indigo-ink);
+}
+
+.stage-card__accommodation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  padding: 4px 0;
+}
+
+.stage-card__accommodation + .stage-card__accommodation {
+  border-top: 1px solid rgba(184, 134, 43, 0.18);
+  padding-top: 8px;
+}
+
+.stage-card__accommodation-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.stage-card__accommodation-name {
+  color: var(--ink-900);
+  font-weight: var(--fw-medium);
+}
+
+.stage-card__dates {
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-xs);
+}
+
+.stage-card__excursions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--fs-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stage-card__excursions li + li {
+  border-top: 1px solid rgba(42, 74, 123, 0.14);
+  padding-top: 6px;
+}
+
+.stage-card__excursion-date {
+  color: var(--indigo-ink);
+  font-weight: var(--fw-medium);
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-card__excursions li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.stage-card__actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: var(--hairline);
+}
+
+/* Planning view toggle + day view */
+
+.planning {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  margin: var(--sp-3) var(--sp-3) 0;
+  padding: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  flex-shrink: 0;
+}
+
+.segmented__button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--ink-500);
+  cursor: pointer;
+}
+
+.segmented__button--active {
+  background: var(--surface-1);
+  border-color: var(--line);
+  color: var(--ink-900);
+}
+
+.planning__content {
+  flex: 1;
+  min-height: 0;
+}
+
+.day-view {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.day-card {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  padding-left: calc(var(--sp-4) + 4px);
+  background: var(--surface-1);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+}
+
+.day-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: var(--r-md) 0 0 var(--r-md);
+  background: var(--line-strong);
+}
+
+/* Seul "aujourd'hui" garde une couleur de rôle propre (or) — transition et
+   excursion restaient en vermillon/indigo, qui sont déjà les couleurs de
+   catégories/transports (--cat-restaurant, --cat-shop...). Comme les cartes
+   d'activité (.activity-card) utilisent le même liseré 3-4px coloré par
+   catégorie et apparaissent imbriquées dans .day-card__activities, les deux
+   liserés côte à côte se lisaient comme la même information. Le vermillon/
+   indigo reste utilisé, mais uniquement sur des éléments porteurs d'un
+   libellé (.day-card__transition, __leg, __excursion) où l'ambiguïté ne peut
+   pas se produire. */
+.day-card--today::before {
+  background: var(--gold);
+}
+
+.day-card--current {
+  border-color: var(--vermillon);
+  outline: 1.5px solid var(--vermillon);
+  outline-offset: -1px;
+}
+
+.day-card:active {
+  opacity: 0.85;
+}
+
+.day-card__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  margin-bottom: 6px;
+}
+
+.day-card__date {
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-900);
+}
+
+.day-card__transition {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: var(--fw-semibold);
+  color: var(--vermillon-ink);
+  margin-bottom: 4px;
+}
+
+.day-card__location {
+  color: var(--ink-700);
+  font-weight: var(--fw-medium);
+}
+
+.day-card__leg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--leg-color, var(--ink-500));
+  margin-top: 6px;
+}
+
+.day-card__sub {
+  color: var(--ink-500);
+  font-size: var(--fs-xs);
+  margin-top: 2px;
+}
+
+.day-card__excursion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--indigo-wash);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--indigo-ink);
+}
+
+.day-card__excursion em {
+  color: var(--indigo-ink);
+  opacity: 0.75;
+}
+
+.day-card__activities {
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  cursor: default;
+}
+
+.day-card__activities .activity-card {
+  padding: var(--sp-2) var(--sp-3);
+  padding-left: calc(var(--sp-3) + 3px);
+  background: var(--surface-2);
+}
+
+.day-card__unscheduled-title {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--ink-500);
+}
+
+/* Frise horaire d'un jour (DayAgenda) — resserrée sur les activités du jour,
+   pas une plage fixe : chaque DayCard a son propre axe indépendant. */
+.day-agenda {
+  position: relative;
+  margin-left: 44px;
+}
+
+.day-agenda__rail {
+  position: absolute;
+  left: -22px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.day-agenda__hour {
+  position: absolute;
+  left: -44px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-agenda__hour-label {
+  width: 34px;
+  flex-shrink: 0;
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-agenda__hour-line {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.day-agenda__entry {
+  position: absolute;
+  left: 0;
+  right: 0;
+  min-height: 88px; /* couplé à ENTRY_HEIGHT, DayAgenda.tsx */
+}
+
+.day-agenda__dot {
+  position: absolute;
+  left: -26px;
+  top: 10px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--card-rail, var(--line-strong));
+  box-shadow: 0 0 0 2px var(--surface-1);
+}
+
+/* Créneau bloqué (Activity.endTime) — épaissit/colore le rail sur la durée
+   réelle du créneau (indépendant de la hauteur de la carte, qui peut être
+   plus grande ou plus petite que le créneau lui-même selon sa durée, et de
+   son éventuel décalage anti-collision). */
+.day-agenda__span {
+  position: absolute;
+  left: -23.5px;
+  width: 3px;
+  border-radius: var(--r-pill);
+}
+
+.activity-card--compact {
+  padding: var(--sp-1) var(--sp-2);
+}
+
+/* Map markers */
+
+.stage-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--vermillon);
+  color: var(--vermillon-on);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--elev-marker), 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.excursion-marker span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--indigo);
+  box-shadow: var(--elev-marker), 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.accommodation-marker {
+  width: 16px;
+  height: 16px;
+  background: var(--vermillon);
+  border-radius: 4px;
+  transform: rotate(45deg);
+  box-shadow: var(--elev-marker), 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.activity-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--marker-color);
+  box-shadow: var(--elev-marker), 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.activity-marker--wishlist {
+  /* --elev-marker (halo blanc 2px) est peint par-dessus les shadows suivants
+     (premier listé = au-dessus) : l'anneau doré doit donc avoir un spread
+     nettement supérieur à 2px pour qu'une bande dorée reste visible entre
+     les deux (2px de bande ici, au lieu d'1px avant), sans grossir le pin. */
+  box-shadow: var(--elev-marker), 0 0 0 4px var(--gold), 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.popup-notes {
+  max-width: 220px;
+  font-size: 12px;
+  line-height: 1.35;
+  margin: 4px 0;
+}
+
+.popup-planned {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vermillon);
+  margin: 4px 0;
+}
+
+.activity-popup {
+  position: relative;
+}
+
+.popup-stamp {
+  position: absolute;
+  padding: 3px 8px;
+  border: 2px solid;
+  border-radius: var(--r-sm);
+  background: var(--stamp-bg);
+  font-family: var(--font-serif);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-stamp);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.popup-stamp--wishlist {
+  top: -10px;
+  right: -8px;
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: rotate(-8deg);
+}
+
+.popup-stamp--favorite {
+  top: -10px;
+  left: -8px;
+  border-color: var(--vermillon);
+  color: var(--vermillon);
+  transform: rotate(8deg);
+}
+
+.popup-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vermillon);
+  text-decoration: none;
+}
+
+.popup-nav-link:hover {
+  text-decoration: underline;
+}
+
+.popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.popup-goto-btn {
+  display: inline-block;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--indigo);
+  cursor: pointer;
+}
+
+.popup-goto-btn:hover {
+  text-decoration: underline;
+}
+
+/* Thème MapLibre — la lib importe son propre CSS (maplibre-gl.css, entièrement
+   clair) : sans ces overrides, popups et contrôles de zoom restent blancs sur
+   fond sombre. */
+.maplibregl-popup-content {
+  background: var(--surface-1);
+  color: var(--ink-700);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  box-shadow: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+}
+
+.maplibregl-popup-content strong {
+  color: var(--ink-900);
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--surface-1);
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--surface-1);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--surface-1);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--surface-1);
+}
+
+.maplibregl-popup-close-button {
+  color: var(--ink-500);
+}
+
+.maplibregl-ctrl-group {
+  background: var(--surface-1);
+  box-shadow: none;
+  border: 1px solid var(--line);
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--line);
+}
+
+.maplibregl-ctrl-icon {
+  filter: var(--maplibre-icon-filter, none);
+}
+
+.maplibregl-ctrl-attrib {
+  background: var(--surface-1);
+  color: var(--ink-500);
+}
+
+/* Activities tab */
+
+.activities {
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.activities__fab {
+  position: absolute;
+  right: var(--sp-4);
+  bottom: var(--sp-4);
+  z-index: 10;
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: var(--r-lg);
+  background: var(--vermillon);
+  color: var(--vermillon-on);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--elev-fab);
+  cursor: pointer;
+}
+
+.activities__topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-3) 0;
+  flex-shrink: 0;
+}
+
+.activities__search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.activities__search-icon {
+  position: absolute;
+  left: var(--sp-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-300);
+  pointer-events: none;
+}
+
+.activities__search-input {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--sp-3) 0 38px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: var(--fs-input);
+}
+
+.activities__search-input:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: var(--ring-focus);
+}
+
+.activities__filter-badge {
+  margin-left: 2px;
+  padding: 1px 7px;
+}
+
+.activities__filter-panel {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.activities__stage-filter {
+  padding: var(--sp-3) var(--sp-3) 0;
+}
+
+.activities__stage-filter select {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: var(--fs-input);
+}
+
+.activities__filter-group {
+  padding: var(--sp-3);
+}
+
+.activities__filter-group:not(:last-child) {
+  border-bottom: 1px solid var(--line);
+}
+
+.activities__filter-group-title {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--ink-500);
+  margin: 0 0 var(--sp-2);
+}
+
+.activities__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.activities__total {
+  padding: var(--sp-2) var(--sp-3) 0;
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  flex-shrink: 0;
+}
+
+.activities__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-3) 84px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.activities__empty {
+  text-align: center;
+  color: var(--ink-500);
+  padding: var(--sp-6) 0;
+}
+
+.activities__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.activities__group-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-medium);
+  color: var(--ink-900);
+}
+
+.activities__group-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.activities__group-count {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-card-row {
+  position: relative;
+}
+
+.activity-card__swipe-actions {
+  position: absolute;
+  inset: 0;
+  left: auto;
+  width: 128px;
+  display: flex;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  overflow: hidden;
+}
+
+.activity-card__swipe-btn {
+  flex: 1;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vermillon-on);
+  cursor: pointer;
+}
+
+.activity-card__swipe-btn--edit {
+  background: var(--indigo);
+  color: var(--indigo-on);
+}
+
+.activity-card__swipe-btn--delete {
+  background: var(--danger);
+  color: var(--danger-on);
+}
+
+.activity-card {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  padding-left: calc(var(--sp-4) + 3px);
+  background: var(--surface-1);
+}
+
+.activity-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--card-rail, var(--line-strong));
+  border-radius: var(--r-md) 0 0 var(--r-md);
+}
+
+.activity-card--swipeable {
+  touch-action: pan-y;
+}
+
+.activity-card--impact {
+  animation: activity-card-impact 0.24s ease-out;
+}
+
+@keyframes activity-card-impact {
+  0% {
+    scale: 1;
+  }
+  35% {
+    scale: 0.985;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.activity-card__stamp {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  padding: 3px 8px;
+  border: 2px solid var(--gold);
+  border-radius: var(--r-sm);
+  background: var(--stamp-bg);
+  color: var(--gold);
+  font-family: var(--font-serif);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-stamp);
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: activity-card-stamp-down 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.activity-card__stamp--exiting {
+  animation: activity-card-stamp-lift 0.32s ease-in forwards;
+}
+
+@keyframes activity-card-stamp-down {
+  0% {
+    opacity: 0;
+    transform: rotate(-8deg) scale(2.6) translateY(-14px);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-10deg) scale(0.92) translateY(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1) translateY(0);
+  }
+}
+
+@keyframes activity-card-stamp-lift {
+  0% {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(6deg) scale(0.6) translateY(-10px);
+  }
+}
+
+.activity-card--clickable {
+  cursor: pointer;
+}
+
+.activity-card--clickable:active {
+  opacity: 0.85;
+}
+
+.activity-card--focused {
+  border-color: var(--indigo);
+  outline: 1.5px solid var(--indigo);
+  outline-offset: -1px;
+}
+
+.activity-card--done .activity-card__name {
+  opacity: 0.6;
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-300);
+}
+
+.activity-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.activity-card__done-icon {
+  color: var(--matcha);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.activity-card__name {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-900);
+  font-size: var(--fs-body);
+}
+
+.activity-card__rating {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.activity-card__hours {
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  margin-top: 4px;
+}
+
+.activity-card__notes {
+  font-size: var(--fs-sm);
+  margin: 6px 0 4px;
+  line-height: 1.4;
+}
+
+.notes-link {
+  color: var(--accent);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.activity-card__comment {
+  font-size: var(--fs-sm);
+  margin: 4px 0;
+  line-height: 1.4;
+  font-style: italic;
+  color: var(--ink-700);
+}
+
+.activity-card__footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 4px;
+}
+
+.activity-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* Onglet Ressources */
+
+.resources {
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.resources__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-3) 84px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.resource-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-1);
+}
+
+.resource-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.resource-card__icon {
+  flex-shrink: 0;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.resource-card__text {
+  min-width: 0;
+}
+
+.resource-card__link {
+  color: var(--ink-900);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-body);
+}
+
+.resource-card__description {
+  margin: 4px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-500);
+}
+
+.resource-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
+
+/* Connexion au fichier Drive + ajout d'activité */
+
+.connect-drive-file {
+  margin: var(--sp-3) var(--sp-3) 0;
+  padding: var(--sp-3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.connect-drive-file p {
+  font-size: var(--fs-sm);
+  margin-bottom: var(--sp-2);
+  color: var(--ink-700);
+}
+
+.connect-drive-file__hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  margin-bottom: 0;
+}
+
+/* Modales — squelette (fond, sheet, header, footer, champs) géré par
+   <Sheet>/<Field>/<Button> (src/components/ui/). Ce qui suit est le résidu
+   propre à chaque modale : mises en page bespoke que les primitives ne
+   couvrent pas encore (Phase 4+ retokenisera ces couleurs). */
+
+.activity-rating-modal__done-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.activity-rating-modal__favorite-inline {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.activity-rating-modal__emoji-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.activity-rating-modal__emoji-input-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.activity-rating-modal__emoji-input {
+  width: 72px;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-h);
+  font-size: 28px;
+  text-align: center;
+  font-family: inherit;
+}
+
+.activity-rating-modal__emoji-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-300);
+}
+
+.coordinates-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+}
+
+.coordinates-field__results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.coordinates-field__results button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.coordinates-field__hint {
+  font-size: 12px;
+  color: var(--ink-500);
+  margin: 0;
+}
+
+.coordinates-field__hint--error {
+  color: var(--danger);
+  opacity: 1;
+}
+
+/* Assigner une activité existante à un jour (Planning) / planifier un jour pour une activité (Activités) */
+
+.activity-picker-modal__search {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-h);
+  font-size: 14px;
+  width: 100%;
+}
+
+.activity-picker-modal__list,
+.day-picker-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-picker-modal__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  text-align: left;
+  cursor: pointer;
+}
+
+.activity-picker-modal__name {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 14px;
+  flex: 1;
+}
+
+.activity-picker-modal__current {
+  width: 100%;
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+.day-picker-modal__option {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-h);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.day-picker-modal__option--active {
+  border-color: var(--accent);
+  outline: 1.5px solid var(--accent);
+  outline-offset: -1px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Paramètres (apparence + fichier de voyages + carte hors ligne) */
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-section + .settings-section {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-section .segmented {
+  margin: 0;
+}
+
+/* .sheet__error (ui.css) porte sa propre marge horizontale pour s'aligner
+   quand Sheet le place lui-même entre le corps et le footer — ici il est
+   nichée dans .settings-section, qui a déjà le padding du corps de la sheet,
+   donc cette marge le désaligne des boutons voisins. */
+.settings-section .sheet__error {
+  margin: 0;
+}
+
+.settings-status {
+  font-size: 13px;
+  color: var(--ink-500);
+}
+
+.settings-hint {
+  font-size: 12px;
+  color: var(--ink-500);
+  line-height: 1.4;
+}
+
+/* Filtres de la carte */
+
+.map-filter-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.map-filter-modal__section:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+
+.map-filter-modal__section-title {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--ink-500);
+}
+
+.map-filter-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -1,0 +1,271 @@
+/*
+ * Système de tokens — direction "japonisant sobre" (papier washi / encre sumi).
+ * `color-scheme` suit le thème RÉSOLU (pas l'OS) : c'est lui qui pilote le rendu
+ * natif du <select> du header, des <input type="date"> et des checkbox — sans
+ * ça un contrôle natif clair reste illisible sur fond sumi. `useTheme` (voir
+ * src/hooks/useTheme.ts) écrit toujours un data-theme concret ('light'|'dark')
+ * sur <html> dès le boot, donc aucune des trois règles ci-dessous ne se
+ * chevauche jamais en pratique — mais la spécificité est choisie pour que ce
+ * soit vrai même si le JS n'a pas encore tourné (SSR/premier paint).
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --surface-0: #f4f1ea; /* fond d'app — papier washi */
+  --surface-1: #fbf9f4; /* cartes, sheets */
+  --surface-2: #ede8de; /* champs, chips inactifs, cartes imbriquées */
+  --surface-scrim: rgba(30, 26, 22, 0.42);
+  --stamp-bg: rgba(251, 249, 244, 0.94);
+
+  /* Encre */
+  --ink-900: #1c1a17; /* titres — sumi */
+  --ink-700: #3a352e; /* corps */
+  --ink-500: #6e665a; /* méta, labels */
+  --ink-300: #a2998a; /* placeholder, désactivé */
+
+  /* Filets */
+  --line: #ded7c9;
+  --line-strong: #c9c0ae;
+
+  /* Rôles */
+  --vermillon: #c8442e;
+  --vermillon-ink: #a63520;
+  --vermillon-wash: rgba(200, 68, 46, 0.1);
+  --vermillon-on: #fff8f3;
+
+  --indigo: #2a4a7b;
+  --indigo-ink: #24406b;
+  --indigo-wash: rgba(42, 74, 123, 0.1);
+  --indigo-on: #f5f8fc;
+
+  --gold: #b8862b;
+  --gold-ink: #8c6413;
+  --gold-wash: rgba(184, 134, 43, 0.12);
+  --gold-on: #2a1c04;
+
+  --matcha: #4f7a46;
+  --matcha-ink: #3c5f34;
+  --matcha-wash: rgba(79, 122, 70, 0.12);
+  --matcha-on: #f4faf2;
+
+  --danger: #9e2b1e;
+  --danger-ink: #7f2217;
+  --danger-wash: rgba(158, 43, 30, 0.1);
+  --danger-on: #fff6f4;
+
+  --trail: #8a5a1e;
+
+  /* Catégories d'activités — même ramp que src/theme/categories.ts (source de
+     vérité pour le TS/MapLibre) ; ces valeurs CSS servent de secours avant que
+     writeColorVars() n'écrive les --cat-* et --transport-* effectifs sur <html>. */
+  --cat-restaurant: #c8442e;
+  --cat-museum: #6b4e8f;
+  --cat-shop: #2a4a7b;
+  --cat-point_of_interest: #3f7a56;
+  --cat-hike: #1f6f73;
+  --cat-cycling: #a6417a;
+
+  --transport-shinkansen: #c8442e;
+  --transport-train: #3f7a56;
+  --transport-bus: #2a4a7b;
+  --transport-plane: #6b4e8f;
+  --transport-ferry: #1f6f73;
+
+  /* Espacement, rayons, filets, focus, élévation */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-sheet: 18px;
+  --r-pill: 999px;
+
+  --hairline: 1px solid var(--line);
+  --hairline-strong: 1px solid var(--line-strong);
+  --ring-focus: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--indigo);
+  --elev-fab: 0 2px 8px rgba(28, 26, 23, 0.18);
+  --elev-marker: 0 0 0 2px var(--surface-1);
+  --tap-min: 44px;
+
+  /* Typographie */
+  --font-serif: 'Noto Serif', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  --fs-display: 22px;
+  --lh-display: 1.25;
+  --fs-title: 18px;
+  --lh-title: 1.3;
+  --fs-subtitle: 16px;
+  --lh-subtitle: 1.35;
+  --fs-body: 15px;
+  --lh-body: 1.45;
+  --fs-sm: 13px;
+  --lh-sm: 1.4;
+  --fs-xs: 11px;
+  --lh-xs: 1.3;
+  --fs-input: 16px; /* jamais moins : <16px déclenche le zoom auto du WebView au focus */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --ls-caps: 0.08em;
+  --ls-stamp: 0.12em;
+
+  /* Mouvement */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --dur-stamp: 400ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-stamp: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --surface-0: #14120f;
+    --surface-1: #1c1a16;
+    --surface-2: #26231e;
+    --surface-scrim: rgba(0, 0, 0, 0.62);
+    --stamp-bg: rgba(38, 35, 30, 0.94);
+
+    --ink-900: #f2ede3;
+    --ink-700: #d6cfc2;
+    --ink-500: #9a9184;
+    --ink-300: #6b6459;
+
+    --line: #2f2b25;
+    --line-strong: #443e35;
+
+    --vermillon: #e4674d;
+    --vermillon-ink: #f08d75;
+    --vermillon-wash: rgba(228, 103, 77, 0.16);
+    --vermillon-on: #1a0f0b;
+
+    --indigo: #7fa3d8;
+    --indigo-ink: #9cbae6;
+    --indigo-wash: rgba(127, 163, 216, 0.16);
+    --indigo-on: #0c1626;
+
+    --gold: #d9a94a;
+    --gold-ink: #e7c071;
+    --gold-wash: rgba(217, 169, 74, 0.16);
+    --gold-on: #241a02;
+
+    --matcha: #7fa86f;
+    --matcha-ink: #9cc08d;
+    --matcha-wash: rgba(127, 168, 111, 0.16);
+    --matcha-on: #10190c;
+
+    --danger: #e3705c;
+    --danger-ink: #ef9686;
+    --danger-wash: rgba(227, 112, 92, 0.16);
+    --danger-on: #260c07;
+
+    --trail: #c08a3e;
+
+    --cat-restaurant: #e4674d;
+    --cat-museum: #a98ccb;
+    --cat-shop: #7fa3d8;
+    --cat-point_of_interest: #79ae8c;
+    --cat-hike: #63adb1;
+    --cat-cycling: #d57fae;
+
+    --transport-shinkansen: #e4674d;
+    --transport-train: #79ae8c;
+    --transport-bus: #7fa3d8;
+    --transport-plane: #a98ccb;
+    --transport-ferry: #63adb1;
+
+    --elev-fab: 0 2px 10px rgba(0, 0, 0, 0.55);
+    --maplibre-icon-filter: invert(1);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --surface-0: #14120f;
+  --surface-1: #1c1a16;
+  --surface-2: #26231e;
+  --surface-scrim: rgba(0, 0, 0, 0.62);
+  --stamp-bg: rgba(38, 35, 30, 0.94);
+
+  --ink-900: #f2ede3;
+  --ink-700: #d6cfc2;
+  --ink-500: #9a9184;
+  --ink-300: #6b6459;
+
+  --line: #2f2b25;
+  --line-strong: #443e35;
+
+  --vermillon: #e4674d;
+  --vermillon-ink: #f08d75;
+  --vermillon-wash: rgba(228, 103, 77, 0.16);
+  --vermillon-on: #1a0f0b;
+
+  --indigo: #7fa3d8;
+  --indigo-ink: #9cbae6;
+  --indigo-wash: rgba(127, 163, 216, 0.16);
+  --indigo-on: #0c1626;
+
+  --gold: #d9a94a;
+  --gold-ink: #e7c071;
+  --gold-wash: rgba(217, 169, 74, 0.16);
+  --gold-on: #241a02;
+
+  --matcha: #7fa86f;
+  --matcha-ink: #9cc08d;
+  --matcha-wash: rgba(127, 168, 111, 0.16);
+  --matcha-on: #10190c;
+
+  --danger: #e3705c;
+  --danger-ink: #ef9686;
+  --danger-wash: rgba(227, 112, 92, 0.16);
+  --danger-on: #260c07;
+
+  --trail: #c08a3e;
+
+  --cat-restaurant: #e4674d;
+  --cat-museum: #a98ccb;
+  --cat-shop: #7fa3d8;
+  --cat-point_of_interest: #79ae8c;
+  --cat-hike: #63adb1;
+  --cat-cycling: #d57fae;
+
+  --transport-shinkansen: #e4674d;
+  --transport-train: #79ae8c;
+  --transport-bus: #7fa3d8;
+  --transport-plane: #a98ccb;
+  --transport-ferry: #63adb1;
+
+  --elev-fab: 0 2px 10px rgba(0, 0, 0, 0.55);
+  --maplibre-icon-filter: invert(1);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

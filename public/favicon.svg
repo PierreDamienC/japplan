@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 108 108">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1B2A4A"/>
+      <stop offset="0.55" stop-color="#6B3E5C"/>
+      <stop offset="1" stop-color="#E8703D"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="54" cy="63" r="19" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFEFD1" stop-opacity="1"/>
+      <stop offset="0.55" stop-color="#FFD599" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FFD599" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="rounded"><rect x="0" y="0" width="108" height="108" rx="22"/></clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <rect x="0" y="0" width="108" height="108" fill="url(#bg)"/>
+    <circle cx="54" cy="63" r="19" fill="url(#sun)"/>
+    <rect x="0" y="81" width="108" height="1.6" fill="#FFFFFF" opacity="0.16"/>
+    <path fill="#16213E" d="M26,34 H82 V44 H26 Z M30,54 H78 V60 H30 Z M39,44 H45 V82 H39 Z M63,44 H69 V82 H63 Z"/>
+  </g>
+</svg>

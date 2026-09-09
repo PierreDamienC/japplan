@@ -1,0 +1,52 @@
+@import './theme/fonts.css';
+@import './theme/tokens.css';
+
+:root {
+  /* Encoches / barres système. Capacitor 8 (plugin SystemBars, auto-enregistré) injecte
+     --safe-area-inset-* sur <html> ; env() ne vaut que dans le mode passthrough du WebView,
+     d'où le double repli. Les 0px en première déclaration sont le filet de sécurité si
+     env() n'est pas reconnu (la déclaration suivante est alors ignorée au parsing). */
+  --sai-top: 0px;
+  --sai-bottom: 0px;
+  --sai-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --sai-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+
+  /* Pont de compatibilité — App.css sera progressivement migré vers les tokens
+     de theme/tokens.css (phases 4-7) ; en attendant, ces 7 anciennes variables
+     redirigent vers la nouvelle palette washi/sumi pour que toute l'app
+     adopte le thème d'un coup dès cette phase. */
+  --text: var(--ink-700);
+  --text-h: var(--ink-900);
+  --bg: var(--surface-0);
+  --bg-elevated: var(--surface-1);
+  --border: var(--line);
+  --accent: var(--vermillon);
+  --accent-bg: var(--vermillon-wash);
+
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+h1,
+h2 {
+  font-family: var(--font-serif);
+  font-weight: var(--fw-medium);
+  color: var(--text-h);
+  margin: 0;
+}

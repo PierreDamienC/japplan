@@ -1,0 +1,38 @@
+{
+  "name": "japplan",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:pages": "tsc -b && vite build --mode gh-pages",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "activities:build": "node scripts/build-activities.mjs",
+    "activities:geocode": "node scripts/geocode-activities.mjs",
+    "deploy": "powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/preferences": "^8.0.1",
+    "@protomaps/basemaps": "^5.7.2",
+    "maplibre-gl": "^5.24.0",
+    "pmtiles": "^4.4.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.2",
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "oxlint": "^1.71.0",
+    "typescript": "~6.0.2",
+    "vite": "^6.4.3"
+  }
+}
