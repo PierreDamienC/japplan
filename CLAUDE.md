@@ -139,6 +139,7 @@ Filtering is entirely client-side and recomputed in one `useMemo`: category chip
 - UI copy is in French throughout (personal app for a French-speaking user).
 - No comments except to explain non-obvious *why* (a constraint, a workaround, an invariant) — see existing files for the level expected.
 - New UI reaches for `src/theme/tokens.css` custom properties and the `src/components/ui/` primitives (`Sheet`, `Button`, `Chip`, `Icon`, `Field`) first — no new raw hex colors, no new hand-rolled modal/button/chip markup, no new emoji used as a UI icon. The only emoji left in the app are user *data* (`Activity.rating`, `Resource.icon`) — those stay emoji on purpose (free-form, typed via the device's own emoji keyboard), never route icon-affordance emoji (✏🗑📅 etc.) back in.
+- **Commit messages and PR titles/descriptions**: Conventional Commits format, with French text after the prefix — `<type>: <description en français>` (e.g. `fix: corrige le plantage sur fichier de base de données vide`, `feat: ajoute le tri par date dans Activités`). Common types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`. A PR description's body (summary bullets, test plan) is also in French; only the Conventional Commits type prefix itself and standard boilerplate (e.g. the `Co-Authored-By` trailer) stay in English.
 
 ## Known pitfalls
 

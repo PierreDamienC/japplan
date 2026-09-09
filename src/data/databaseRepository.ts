@@ -52,6 +52,10 @@ export async function loadDatabase(): Promise<{ database: Database; file: Connec
     throw new ReadError(e instanceof Error ? e.message : String(e))
   }
 
+  if (content.trim().length === 0) {
+    return { database: { trips: [] }, file }
+  }
+
   let parsed: unknown
   try {
     parsed = JSON.parse(content)
