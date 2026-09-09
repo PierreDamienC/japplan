@@ -109,6 +109,11 @@ export const DEFAULT_WISHLIST_STAMP_LABEL = 'Wishlist'
 // Racine du fichier JSON partagé sur Google Drive (voir src/hooks/useDatabase.ts
 // et src/data/databaseRepository.ts) — chaque Trip est autonome (stages +
 // activités imbriqués), pas de clé étrangère entre trips.
+//
+// `schemaVersion` absent = fichier jamais passé par le pipeline de migration
+// (src/data/migrations.ts), traité comme la version courante au chargement —
+// voir ce fichier pour la logique de migration.
 export interface Database {
   trips: Trip[]
+  schemaVersion?: number
 }

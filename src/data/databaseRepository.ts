@@ -1,5 +1,6 @@
 import { Preferences } from '@capacitor/preferences'
 import { DriveFile } from '../plugins/DriveFile'
+import { migrateDatabase } from './migrations'
 import type { Database, Trip } from '../types/trip'
 
 const URI_KEY = 'databaseFileUri'
@@ -67,7 +68,16 @@ export async function loadDatabase(): Promise<{ database: Database; file: Connec
     throw new ParseError('Le fichier ne contient pas une base de voyages valide.')
   }
 
-  return { database: parsed, file }
+  const { database, migrated } = migrateDatabase(parsed)
+  if (migrated) {
+    // Best-effort : la forme migrée est déjà celle retournée et utilisée en
+    // mémoire même si l'écriture échoue (hors-ligne, etc.) — migrateDatabase
+    // est idempotente, donc le prochain chargement ou la prochaine
+    // modification depuis l'app la réécrira.
+    saveDatabase(file, database).catch(() => {})
+  }
+
+  return { database, file }
 }
 
 export async function saveDatabase(file: ConnectedFile, database: Database): Promise<void> {
