@@ -1,5 +1,6 @@
 import { Preferences } from '@capacitor/preferences'
 import { DriveFile } from '../plugins/DriveFile'
+import { migrateDatabase } from './migrations'
 import type { Database, Trip } from '../types/trip'
 
 const URI_KEY = 'databaseFileUri'
@@ -38,10 +39,7 @@ function isDatabase(value: unknown): value is Database {
   return !!value && typeof value === 'object' && isTripArray((value as Partial<Database>).trips)
 }
 
-export async function loadDatabase(): Promise<{ database: Database; file: ConnectedFile }> {
-  const file = await getStoredFile()
-  if (!file) throw new NoFileSelectedError()
-
+async function readDatabaseContent(file: ConnectedFile): Promise<{ database: Database; migrated: boolean }> {
   const { granted } = await DriveFile.hasPersistedAccess({ uri: file.uri })
   if (!granted) throw new AccessRevokedError()
 
@@ -53,7 +51,7 @@ export async function loadDatabase(): Promise<{ database: Database; file: Connec
   }
 
   if (content.trim().length === 0) {
-    return { database: { trips: [] }, file }
+    return { database: { trips: [] }, migrated: false }
   }
 
   let parsed: unknown
@@ -67,7 +65,47 @@ export async function loadDatabase(): Promise<{ database: Database; file: Connec
     throw new ParseError('Le fichier ne contient pas une base de voyages valide.')
   }
 
-  return { database: parsed, file }
+  // Appliqué à chaque lecture distante (chargement initial, rebase d'écriture,
+  // polling de fraîcheur) — migrateDatabase est idempotente et purement en
+  // mémoire, donc ça garantit que toute donnée manipulée par l'app est toujours
+  // à la forme courante, peu importe le point d'entrée qui l'a récupérée.
+  return migrateDatabase(parsed)
+}
+
+// Relit le contenu distant sans retoucher aux Preferences — utilisé par le rebase
+// d'écriture et le polling de fraîcheur dans useDatabase.ts, qui connaissent déjà
+// le `ConnectedFile` courant.
+export async function fetchRemoteDatabase(file: ConnectedFile): Promise<Database> {
+  const { database } = await readDatabaseContent(file)
+  return database
+}
+
+// Vérification légère (métadonnée seule, pas de contenu) de la version distante —
+// voir le commentaire sur DriveFilePlugin.getMetadata pour le format du jeton.
+export async function getRemoteVersion(file: ConnectedFile): Promise<string> {
+  const { modifiedTime } = await DriveFile.getMetadata({ uri: file.uri })
+  return modifiedTime
+}
+
+export async function loadDatabase(): Promise<{ database: Database; file: ConnectedFile; version: string | null }> {
+  const file = await getStoredFile()
+  if (!file) throw new NoFileSelectedError()
+
+  const { database, migrated } = await readDatabaseContent(file)
+  if (migrated) {
+    // Best-effort : la forme migrée est déjà celle retournée et utilisée en
+    // mémoire même si l'écriture échoue (hors-ligne, etc.) — migrateDatabase
+    // est idempotente, donc le prochain chargement ou la prochaine
+    // modification depuis l'app la réécrira.
+    saveDatabase(file, database).catch(() => {})
+  }
+  // Un échec du check de version ne doit pas faire échouer tout le chargement — le
+  // contenu est déjà lu avec succès ; on démarre juste avec une base "inconnue"
+  // (null), ce qui ne fait que déclencher un rebase superflu-mais-inoffensif à la
+  // prochaine écriture (voir runWriteLoop dans useDatabase.ts).
+  const version = await getRemoteVersion(file).catch(() => null)
+
+  return { database, file, version }
 }
 
 export async function saveDatabase(file: ConnectedFile, database: Database): Promise<void> {

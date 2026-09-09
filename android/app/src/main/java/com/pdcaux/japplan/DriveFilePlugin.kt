@@ -5,6 +5,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Base64
 import androidx.activity.result.ActivityResult
@@ -113,6 +114,37 @@ class DriveFilePlugin : Plugin() {
             call.reject("ACCESS_REVOKED", e)
         } catch (e: IOException) {
             call.reject("WRITE_FAILED", e)
+        }
+    }
+
+    // Vérification légère de fraîcheur pour la synchro multi-utilisateur (voir
+    // useDatabase.ts côté JS) — un seul aller-retour ContentResolver.query, aucun
+    // contenu de fichier lu. Même schéma que queryDisplayName ci-dessous, colonne
+    // différente.
+    @PluginMethod
+    fun getMetadata(call: PluginCall) {
+        val uriString = call.getString("uri") ?: return call.reject("MISSING_URI")
+        try {
+            val uri = Uri.parse(uriString)
+            var cursor: Cursor? = null
+            try {
+                cursor = context.contentResolver.query(
+                    uri, arrayOf(DocumentsContract.Document.COLUMN_LAST_MODIFIED), null, null, null
+                )
+                if (cursor != null && cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+                    val lastModified = if (index >= 0) cursor.getLong(index) else 0L
+                    val ret = JSObject()
+                    ret.put("modifiedTime", lastModified.toString())
+                    call.resolve(ret)
+                    return
+                }
+            } finally {
+                cursor?.close()
+            }
+            call.reject("METADATA_FAILED")
+        } catch (e: SecurityException) {
+            call.reject("ACCESS_REVOKED", e)
         }
     }
 

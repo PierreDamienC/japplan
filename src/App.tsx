@@ -49,6 +49,7 @@ function App() {
     status: databaseStatus,
     error: databaseError,
     saveError: databaseSaveError,
+    recentlySynced: databaseRecentlySynced,
     fileName: databaseFileName,
   } = db
 
@@ -307,6 +308,7 @@ function App() {
           databaseStatus={databaseStatus}
           databaseError={databaseError}
           databaseSaveError={databaseSaveError}
+          databaseRecentlySynced={databaseRecentlySynced}
           onRetrySave={db.retrySave}
           databaseFileName={databaseFileName}
           onConnectDatabaseFile={db.connectFile}

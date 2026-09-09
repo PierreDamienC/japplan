@@ -2,7 +2,7 @@
 
 App perso (React + Capacitor) de suivi de voyages : carte interactive, planning par étape/par jour, liste d'activités. Principalement Android, mais aussi accessible depuis un navigateur (desktop, ou iOS) via une connexion Google Drive OAuth2.
 
-Toutes les données de voyage vivent dans un fichier JSON unique sur Google Drive — rien n'est stocké dans ce dépôt. Voir [CLAUDE.md](CLAUDE.md) pour l'architecture complète.
+Toutes les données de voyage vivent dans un fichier JSON unique sur Google Drive — rien n'est stocké dans ce dépôt. L'app détecte et fusionne automatiquement les changements concurrents entre les quelques personnes qui partagent un voyage. Voir [CLAUDE.md](CLAUDE.md) pour l'architecture complète.
 
 ## Setup
 

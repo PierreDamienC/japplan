@@ -17,6 +17,9 @@ interface SettingsModalProps {
   // Distinct de databaseError (échec de lecture/connexion, cf. useDatabase) :
   // une écriture ratée n'y touche plus — voir persist() dans useDatabase.ts.
   databaseSaveError?: string
+  // Bascule brièvement à true après qu'un changement distant (poll) ou un rebase
+  // d'écriture a mis à jour l'état local — voir useDatabase.ts.
+  databaseRecentlySynced?: boolean
   onRetrySave: () => Promise<void>
   databaseFileName?: string
   onConnectDatabaseFile: () => Promise<void>
@@ -36,6 +39,7 @@ export default function SettingsModal({
   databaseStatus,
   databaseError,
   databaseSaveError,
+  databaseRecentlySynced,
   onRetrySave,
   databaseFileName,
   onConnectDatabaseFile,
@@ -110,6 +114,7 @@ export default function SettingsModal({
 
         <p className="settings-status">
           {databaseConnected && `Fichier connecté : ${databaseFileName}`}
+          {databaseConnected && databaseRecentlySynced && ' — mis à jour'}
           {databaseStatus === 'no-file' && !databaseError && 'Aucun fichier de voyages connecté.'}
           {databaseError}
           {databaseStatus === 'loading' && 'Chargement…'}

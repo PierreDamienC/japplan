@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Preferences } from '@capacitor/preferences'
+import { Capacitor } from '@capacitor/core'
+import { App as CapacitorApp } from '@capacitor/app'
 import type { Accommodation, Activity, Excursion, Resource, Stage, TransportLeg, Trip } from '../types/trip'
 import {
   AccessRevokedError,
@@ -7,11 +9,17 @@ import {
   ParseError,
   ReadError,
   connectFile as pickAndConnectFile,
+  fetchRemoteDatabase,
+  getRemoteVersion,
   loadDatabase,
   saveDatabase,
   type ConnectedFile,
 } from '../data/databaseRepository'
 import { uniqueId } from '../utils/activityId'
+
+// Intervalle du polling léger de fraîcheur (voir l'effet plus bas) — vérification
+// de métadonnée seule, jamais de retéléchargement tant que rien n'a changé.
+const POLL_INTERVAL_MS = 15_000
 
 export type DatabaseStatus = 'loading' | 'no-file' | 'error' | 'ready'
 
@@ -28,6 +36,9 @@ export interface UseDatabaseResult {
   // plus faire passer `status` à 'error' et éjecter l'app entière (voir
   // persist ci-dessous) — elle se signale ici, affichée via le ⚙ du header.
   saveError?: string
+  // Passe brièvement à true après qu'un changement distant (poll) ou un rebase
+  // d'écriture a mis à jour l'état local — feedback discret dans SettingsModal.
+  recentlySynced: boolean
   retrySave: () => Promise<void>
   connectFile: () => Promise<void>
   selectTrip: (id: string) => void
@@ -84,6 +95,7 @@ export function useDatabase(): UseDatabaseResult {
   const [error, setError] = useState<string>()
   const [saveError, setSaveError] = useState<string>()
   const [fileName, setFileName] = useState<string>()
+  const [recentlySynced, setRecentlySynced] = useState(false)
   const fileRef = useRef<ConnectedFile | null>(null)
   // Un seul écrivain Drive à la fois, qui écrit toujours le DERNIER état
   // connu plutôt qu'un état capturé au moment de l'appel : si une mutation
@@ -95,17 +107,28 @@ export function useDatabase(): UseDatabaseResult {
   const latestTripsRef = useRef<Trip[]>([])
   const pendingWriteRef = useRef(false)
   const writeLoopRef = useRef<Promise<void> | null>(null)
+  // File des transformations locales pas encore confirmées écrites — rejouée sur
+  // le contenu distant frais en cas de rebase (voir runWriteLoop). `baseVersionRef`
+  // est la version distante sur laquelle `latestTripsRef.current` est actuellement
+  // fondé (mise à jour au chargement, avant un rebase, et après chaque écriture
+  // réussie) ; `null` signifie "inconnue", ce qui force un rebase (inoffensif) à la
+  // prochaine écriture plutôt que de risquer d'écraser un changement distant.
+  const pendingTransformsRef = useRef<Array<(current: Trip[]) => Trip[]>>([])
+  const baseVersionRef = useRef<string | null>(null)
+  const appForegroundRef = useRef(true)
 
   const refresh = useCallback(async () => {
     setStatus('loading')
     setError(undefined)
     setSaveError(undefined)
     try {
-      const { database, file } = await loadDatabase()
+      const { database, file, version } = await loadDatabase()
       fileRef.current = file
       setFileName(file.name)
       setTrips(database.trips)
       latestTripsRef.current = database.trips
+      baseVersionRef.current = version
+      pendingTransformsRef.current = []
       const { value: storedId } = await Preferences.get({ key: SELECTED_TRIP_KEY })
       setSelectedTripId(
         storedId && database.trips.some((t) => t.id === storedId) ? storedId : (database.trips[0]?.id ?? null),
@@ -135,6 +158,83 @@ export function useDatabase(): UseDatabaseResult {
     refresh()
   }, [refresh])
 
+  // Polling léger de fraîcheur en lecture : tant que l'app/l'onglet est au premier
+  // plan, revérifie toutes les POLL_INTERVAL_MS si le fichier distant a changé
+  // (métadonnée seule) — et un check immédiat en plus au retour au premier plan,
+  // pour ne pas attendre jusqu'à 15s après avoir rouvert l'app. Ne fait rien s'il y
+  // a une écriture en vol ou des mutations locales en attente : dans ce cas, c'est
+  // runWriteLoop (rebase à l'écriture) qui gère la fraîcheur, pas ce polling — sinon
+  // on risquerait d'écraser une modification locale pas encore écrite.
+  useEffect(() => {
+    if (status !== 'ready') return
+
+    let cancelled = false
+
+    async function checkForRemoteChanges() {
+      const file = fileRef.current
+      if (!file) return
+      if (writeLoopRef.current || pendingTransformsRef.current.length > 0) return
+      try {
+        const remoteVersion = await getRemoteVersion(file)
+        if (cancelled || remoteVersion === baseVersionRef.current) return
+        const database = await fetchRemoteDatabase(file)
+        if (cancelled) return
+        // Revérifié après le fetch (fenêtre async) : si une mutation locale est
+        // arrivée entretemps, on laisse la main à runWriteLoop plutôt que
+        // d'écraser un edit local avec le contenu distant.
+        if (writeLoopRef.current || pendingTransformsRef.current.length > 0) return
+        setTrips(database.trips)
+        latestTripsRef.current = database.trips
+        baseVersionRef.current = remoteVersion
+        setRecentlySynced(true)
+      } catch {
+        // Échec de poll (réseau transitoire, etc.) — jamais surfacé via saveError,
+        // ce n'est pas un échec d'écriture.
+      }
+    }
+
+    function isForegrounded() {
+      return Capacitor.isNativePlatform() ? appForegroundRef.current : document.visibilityState === 'visible'
+    }
+
+    const timer = setInterval(() => {
+      if (isForegrounded()) checkForRemoteChanges()
+    }, POLL_INTERVAL_MS)
+
+    const cleanups: Array<() => void> = []
+    if (Capacitor.isNativePlatform()) {
+      const sub = CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+        appForegroundRef.current = isActive
+        if (isActive) checkForRemoteChanges()
+      })
+      cleanups.push(() => {
+        sub.then((s) => s.remove())
+      })
+    } else {
+      const onVisible = () => {
+        if (document.visibilityState === 'visible') checkForRemoteChanges()
+      }
+      document.addEventListener('visibilitychange', onVisible)
+      window.addEventListener('focus', onVisible)
+      cleanups.push(() => {
+        document.removeEventListener('visibilitychange', onVisible)
+        window.removeEventListener('focus', onVisible)
+      })
+    }
+
+    return () => {
+      cancelled = true
+      clearInterval(timer)
+      cleanups.forEach((c) => c())
+    }
+  }, [status])
+
+  useEffect(() => {
+    if (!recentlySynced) return
+    const t = setTimeout(() => setRecentlySynced(false), 4000)
+    return () => clearTimeout(t)
+  }, [recentlySynced])
+
   const connectFile = useCallback(async () => {
     setStatus('loading')
     setError(undefined)
@@ -156,12 +256,59 @@ export function useDatabase(): UseDatabaseResult {
   // chaque tentative, jamais figée sur l'état capturé au lancement — c'est ce
   // qui permet à une mutation arrivée pendant une écriture d'être reprise par
   // le même passage plutôt que de partir en parallèle.
+  //
+  // Avant chaque écriture, on revérifie la version distante. Si elle correspond à
+  // `baseVersionRef`, rien n'a changé côté Drive depuis notre dernière lecture/
+  // écriture connue : on écrit directement, comme avant cette fonctionnalité. Si
+  // elle diffère, quelqu'un d'autre a écrit entre-temps — écrire tel quel
+  // `latestTripsRef.current` (fondé sur une base qu'on sait périmée) écraserait ce
+  // changement. On relit alors le contenu distant frais et on rejoue nos
+  // transformations en attente dessus (rebase) avant d'écrire le résultat fusionné.
   const runWriteLoop = useCallback((file: ConnectedFile): Promise<void> => {
     const loop = (async () => {
       try {
         for (;;) {
           pendingWriteRef.current = false
+          const pendingCount = pendingTransformsRef.current.length
+
+          let remoteVersion: string | null
+          try {
+            remoteVersion = await getRemoteVersion(file)
+          } catch {
+            // Le check léger échoue silencieusement (offline, etc.) — on retombe
+            // sur baseVersionRef pour forcer le chemin "pas de changement détecté"
+            // et écrire directement : jamais pire que l'absence totale de
+            // détection de conflit qui existait avant cette fonctionnalité.
+            remoteVersion = baseVersionRef.current
+          }
+
+          if (remoteVersion !== baseVersionRef.current) {
+            // Ce refetch, contrairement au check léger ci-dessus, ne doit PAS
+            // échouer silencieusement : on n'a pas le droit d'écrire une base
+            // qu'on sait périmée. Un échec ici propage vers le catch englobant,
+            // traité comme n'importe quel échec d'écriture (saveError/retrySave).
+            const database = await fetchRemoteDatabase(file)
+            const rebased = pendingTransformsRef.current
+              .slice(0, pendingCount)
+              .reduce((acc, fn) => fn(acc), database.trips)
+            // Toute mutation arrivée pendant CE fetch a été empilée après l'index
+            // pendingCount — on la laisse hors du rebase, la prochaine itération
+            // (déclenchée par pendingWriteRef) la rejouera sur une base encore
+            // plus fraîche.
+            latestTripsRef.current = rebased
+            setTrips(rebased)
+            baseVersionRef.current = remoteVersion
+            setRecentlySynced(true)
+          }
+
           await saveDatabase(file, { trips: latestTripsRef.current })
+          // Tout ce qui était en attente en début d'itération est maintenant
+          // durablement écrit.
+          pendingTransformsRef.current = pendingTransformsRef.current.slice(pendingCount)
+          // Aucune des deux plateformes ne renvoie la nouvelle `modifiedTime` dans
+          // la réponse d'écriture elle-même — un appel léger de plus l'établit.
+          baseVersionRef.current = await getRemoteVersion(file).catch(() => baseVersionRef.current)
+
           if (!pendingWriteRef.current) break
         }
         setSaveError(undefined)
@@ -177,13 +324,19 @@ export function useDatabase(): UseDatabaseResult {
   }, [])
 
   const persist = useCallback(
-    (next: Trip[]): Promise<void> => {
+    (transform: (current: Trip[]) => Trip[]): Promise<Trip[]> => {
       const file = fileRef.current
       if (!file) return Promise.reject(new Error('Aucun fichier connecté.'))
+      const next = transform(latestTripsRef.current)
       setTrips(next)
       latestTripsRef.current = next
+      pendingTransformsRef.current.push(transform)
       pendingWriteRef.current = true
-      return writeLoopRef.current ?? runWriteLoop(file)
+      const loop = writeLoopRef.current ?? runWriteLoop(file)
+      // La boucle elle-même résout en Promise<void> (contrat inchangé, réutilisé
+      // par retrySave) — persist ajoute par-dessus le Trip[] réellement persisté
+      // (après rebase éventuel), utile aux appelants comme deleteTrip.
+      return loop.then(() => latestTripsRef.current)
     },
     [runWriteLoop],
   )
@@ -200,42 +353,49 @@ export function useDatabase(): UseDatabaseResult {
 
   const addTrip = useCallback(
     async (input: Omit<Trip, 'id' | 'stages'>) => {
-      const previous = trips
-      const id = uniqueId(input.name, new Set(previous.map((t) => t.id)))
+      // Généré une seule fois, hors du transform : contrairement à tous les autres
+      // `add*` (dont l'id ne fuit jamais avant que persist() se résolve), celui-ci
+      // est consommé immédiatement ci-dessous (selectTrip/valeur de retour), donc
+      // il doit rester stable même si le transform est rejoué lors d'un rebase.
+      const id = uniqueId(input.name, new Set(latestTripsRef.current.map((t) => t.id)))
       const trip: Trip = { ...input, id, stages: [] }
-      await persist([...previous, trip])
+      await persist((current) =>
+        // Garde-fou pour l'edge case rare d'une collision d'id (deux voyages créés
+        // avec le même nom slugifié, de façon concurrente, dans la même fenêtre de
+        // 15s) : on n'écrase jamais un item existant, on abandonne silencieusement
+        // plutôt que de dupliquer l'id — cas jugé assez rare pour une appli à 2
+        // personnes pour ne pas mériter plus.
+        current.some((t) => t.id === id) ? current : [...current, trip],
+      )
       selectTrip(id)
       return trip
     },
-    [trips, persist, selectTrip],
+    [persist, selectTrip],
   )
 
   const updateTrip = useCallback(
     async (id: string, patch: Partial<Omit<Trip, 'id' | 'stages' | 'activities'>>) => {
-      const previous = trips
-      const next = previous.map((t) => (t.id === id ? { ...t, ...patch } : t))
-      await persist(next)
+      await persist((current) => current.map((t) => (t.id === id ? { ...t, ...patch } : t)))
     },
-    [trips, persist],
+    [persist],
   )
 
   const deleteTrip = useCallback(
     async (id: string) => {
-      const previous = trips
-      const next = previous.filter((t) => t.id !== id)
-      await persist(next)
-      if (selectedTripId === id) selectTrip(next[0]?.id ?? '')
+      const finalTrips = await persist((current) => current.filter((t) => t.id !== id))
+      // Sélection basée sur ce qui a RÉELLEMENT été persisté (après rebase
+      // éventuel), pas sur un `next` précalculé qui pourrait ne plus correspondre
+      // si l'autre personne a modifié la liste entretemps.
+      if (selectedTripId === id) selectTrip(finalTrips[0]?.id ?? '')
     },
-    [trips, persist, selectedTripId, selectTrip],
+    [persist, selectedTripId, selectTrip],
   )
 
   const updateTripInList = useCallback(
     async (tripId: string, fn: (trip: Trip) => Trip) => {
-      const previous = trips
-      const next = previous.map((t) => (t.id === tripId ? fn(t) : t))
-      await persist(next)
+      await persist((current) => current.map((t) => (t.id === tripId ? fn(t) : t)))
     },
-    [trips, persist],
+    [persist],
   )
 
   const addStage = useCallback(
@@ -488,6 +648,7 @@ export function useDatabase(): UseDatabaseResult {
     status,
     error,
     saveError,
+    recentlySynced,
     retrySave,
     fileName,
     connectFile,
