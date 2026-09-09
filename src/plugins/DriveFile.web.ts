@@ -43,6 +43,16 @@ export class DriveFileWeb extends WebPlugin implements DriveFilePlugin {
     if (!res.ok) throw new Error(`Écriture Drive échouée (${res.status}).`)
   }
 
+  async getMetadata(options: { uri: string }): Promise<{ modifiedTime: string }> {
+    const token = await getAccessToken({ interactive: false })
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${options.uri}?fields=modifiedTime`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) throw new Error(`Lecture des métadonnées Drive échouée (${res.status}).`)
+    const data = (await res.json()) as { modifiedTime: string }
+    return { modifiedTime: data.modifiedTime }
+  }
+
   readRange(): Promise<{ dataBase64: string }> {
     return Promise.reject(new Error(OFFLINE_MAP_UNAVAILABLE))
   }
