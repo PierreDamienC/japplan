@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import { setWorkerUrl } from 'maplibre-gl'
-import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Protocol, PMTiles } from 'pmtiles'
 import { layers as protomapsLayers, namedFlavor } from '@protomaps/basemaps'
 import { DEFAULT_WISHLIST_STAMP_LABEL, type Trip, type Stage, type TransportLeg, type TransportMode, type Coordinates, type Activity, type ActivityCategory } from '../types/trip'
@@ -18,8 +17,13 @@ import Chip from './ui/Chip'
 
 // Vite's dependency pre-bundling doesn't preserve the import.meta.url the
 // library normally uses to locate its own worker script, so the worker
-// never starts and tiles never load. Point it at the CSP worker explicitly.
-setWorkerUrl(maplibreWorkerUrl)
+// never starts and tiles never load. Point it at a copy served from a
+// stable, unhashed path instead — see the copy-maplibre-worker Vite plugin
+// in vite.config.ts for why this can't just be a hashed `?url` import
+// (the worker's own compiled code imports a sibling maplibre-gl-shared.mjs
+// by a fixed relative path, so both files must sit next to each other,
+// unhashed, at the copied location).
+setWorkerUrl(`${import.meta.env.BASE_URL}maplibre-worker/maplibre-gl-worker.mjs`)
 
 // Registered once globally, like setWorkerUrl above — see "Carte hors ligne"
 // in CLAUDE.md. The actual PMTiles instance (tied to whichever Drive URI is

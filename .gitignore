@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Copied from node_modules/maplibre-gl at build/dev time — see the
+# copy-maplibre-worker Vite plugin in vite.config.ts.
+public/maplibre-worker/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
