@@ -14,6 +14,9 @@ function Invoke-Step {
     }
 }
 
+$version = (Get-Content (Join-Path $root "package.json") -Raw | ConvertFrom-Json).version
+Write-Host "Version : $version" -ForegroundColor Cyan
+
 Invoke-Step "npm run build" { npm run build }
 Invoke-Step "npx cap sync android" { npx cap sync android }
 

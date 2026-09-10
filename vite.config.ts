@@ -1,10 +1,14 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { copyFileSync, mkdirSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
+
+const { version: appVersion } = JSON.parse(readFileSync(path.join(rootDir, 'package.json'), 'utf-8')) as {
+  version: string
+}
 
 // maplibre-gl 6's worker bundle (maplibre-gl-worker.mjs) imports a sibling
 // maplibre-gl-shared.mjs via a relative path hardcoded inside the compiled
@@ -37,6 +41,9 @@ export default defineConfig(({ mode }) => ({
   // root-relative paths ('/'). GitHub Pages serves this repo under /japplan/, so only
   // the dedicated 'gh-pages' mode (npm run build:pages) switches the base path.
   base: mode === 'gh-pages' ? '/japplan/' : '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   build: {
     // Bundled into the Android APK, not fetched over the network at runtime, so a large
     // vendor chunk (maplibre-gl, ~1055 kB) doesn't cost users download time the way it

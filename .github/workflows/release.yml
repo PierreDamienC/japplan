@@ -1,0 +1,44 @@
+name: Release
+
+# Ne tague/publie une Release que quand `version` dans package.json a réellement
+# changé sur main (bump manuel, délibéré) — pas à chaque push, sinon le repo
+# serait inondé de tags pour du travail courant. Le filtre `paths` évite même de
+# lancer le job pour un push qui ne touche pas package.json.
+on:
+  push:
+    branches: [main]
+    paths: ['package.json']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Lire la version de package.json
+        id: version
+        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Vérifier si le tag existe déjà
+        id: check
+        run: |
+          git fetch --tags
+          if git tag -l "v${{ steps.version.outputs.value }}" | grep -q .; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Créer le tag et la Release
+        if: steps.check.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag "v${{ steps.version.outputs.value }}"
+          git push origin "v${{ steps.version.outputs.value }}"
+          gh release create "v${{ steps.version.outputs.value }}" --generate-notes

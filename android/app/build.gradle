@@ -1,6 +1,16 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 
+// Source unique de la version : package.json à la racine du repo (aussi lu par
+// vite.config.ts pour __APP_VERSION__). versionCode est dérivé arithmétiquement
+// du semver (major*10000 + minor*100 + patch) pour rester un entier strictement
+// croissant à chaque bump — nécessaire pour qu'`adb install -r` accepte la mise
+// à niveau sans `-d`.
+def packageJson = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def appVersionName = packageJson.version
+def versionParts = appVersionName.tokenize('.').collect { it as int }
+def appVersionCode = versionParts[0] * 10_000 + versionParts[1] * 100 + versionParts[2]
+
 android {
     namespace = "com.pdcaux.japplan"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -8,8 +18,8 @@ android {
         applicationId "com.pdcaux.japplan"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

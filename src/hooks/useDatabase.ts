@@ -8,6 +8,7 @@ import {
   NoFileSelectedError,
   ParseError,
   ReadError,
+  SchemaTooNewError,
   connectFile as pickAndConnectFile,
   fetchRemoteDatabase,
   getRemoteVersion,
@@ -144,7 +145,7 @@ export function useDatabase(): UseDatabaseResult {
         setStatus('no-file')
         return
       }
-      if (e instanceof ParseError || e instanceof ReadError) {
+      if (e instanceof ParseError || e instanceof ReadError || e instanceof SchemaTooNewError) {
         setError(e.message)
         setStatus('error')
         return

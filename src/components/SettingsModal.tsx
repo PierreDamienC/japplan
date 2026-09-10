@@ -179,6 +179,8 @@ export default function SettingsModal({
           <strong>Disponible hors connexion</strong> dans l'app Google Drive elle-même.
         </p>
       </section>
+
+      <p className="settings-hint settings-version">Japplan v{__APP_VERSION__}</p>
     </Sheet>
   )
 }
