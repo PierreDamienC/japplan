@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
@@ -76,7 +77,17 @@ class DriveFilePlugin : Plugin() {
     fun readText(call: PluginCall) {
         val uriString = call.getString("uri") ?: return call.reject("MISSING_URI")
         try {
-            val content = context.contentResolver.openInputStream(Uri.parse(uriString))?.use { stream ->
+            val uri = Uri.parse(uriString)
+            // Sans ce refresh(), Google Drive's DocumentsProvider peut servir un
+            // contenu périmé depuis son index local — il ne revérifie pas le
+            // serveur juste parce qu'un tiers ouvre le flux, seulement quand
+            // explicitement invalidé (ou quand l'app Drive elle-même browse le
+            // fichier). Confirmé en observant qu'un changement fait par un autre
+            // appareil n'apparaissait ni au polling ni même après un redémarrage
+            // complet de l'app tant que l'app Drive n'avait pas elle-même
+            // rafraîchi sa liste — refresh() est l'API Android prévue pour ça.
+            refreshUri(uri)
+            val content = context.contentResolver.openInputStream(uri)?.use { stream ->
                 stream.readBytes().toString(Charsets.UTF_8)
             } ?: return call.reject("READ_FAILED")
 
@@ -118,14 +129,19 @@ class DriveFilePlugin : Plugin() {
     }
 
     // Vérification légère de fraîcheur pour la synchro multi-utilisateur (voir
-    // useDatabase.ts côté JS) — un seul aller-retour ContentResolver.query, aucun
-    // contenu de fichier lu. Même schéma que queryDisplayName ci-dessous, colonne
-    // différente.
+    // useDatabase.ts côté JS) — aucun contenu de fichier lu. Même schéma que
+    // queryDisplayName ci-dessous, colonne différente.
     @PluginMethod
     fun getMetadata(call: PluginCall) {
         val uriString = call.getString("uri") ?: return call.reject("MISSING_URI")
         try {
             val uri = Uri.parse(uriString)
+            // Indispensable ici aussi (voir le commentaire sur refresh() dans
+            // readText()) : sans ça, COLUMN_LAST_MODIFIED reste bloqué sur la
+            // valeur de la dernière synchro connue de l'app Drive, pas la valeur
+            // serveur réelle — un changement fait par un autre appareil ne serait
+            // donc jamais détecté par ce check, même après plusieurs minutes.
+            refreshUri(uri)
             var cursor: Cursor? = null
             try {
                 cursor = context.contentResolver.query(
@@ -189,6 +205,18 @@ class DriveFilePlugin : Plugin() {
     override fun handleOnDestroy() {
         closeRangeReadStream()
         super.handleOnDestroy()
+    }
+
+    // Force le DocumentsProvider (Google Drive) à revérifier le serveur avant de
+    // répondre à la prochaine query()/openInputStream() sur cet uri, au lieu de
+    // servir son index local potentiellement périmé — voir les commentaires dans
+    // readText()/getMetadata(). ContentResolver.refresh() n'existe qu'à partir de
+    // l'API 26 (minSdkVersion du projet est 24) ; en dessous, on ne peut rien
+    // faire de plus, le comportement reste celui d'avant cette fonctionnalité.
+    private fun refreshUri(uri: Uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.contentResolver.refresh(uri, null, null)
+        }
     }
 
     private fun openRangeReadStream(uriString: String): FileInputStream {
