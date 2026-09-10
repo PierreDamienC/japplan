@@ -29,6 +29,9 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npx cap sync android
+      - name: Lire la version de package.json
+        id: version
+        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
@@ -46,10 +49,14 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug -Dorg.gradle.java.home="$JAVA_HOME"
+      - name: Renommer l'APK avec la version
+        run: |
+          mv android/app/build/outputs/apk/debug/app-debug.apk \
+             "android/app/build/outputs/apk/debug/japplan-${{ steps.version.outputs.value }}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: japplan-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: japplan-${{ steps.version.outputs.value }}.apk
+          path: android/app/build/outputs/apk/debug/japplan-${{ steps.version.outputs.value }}.apk
           retention-days: 14
 
   trivy:
