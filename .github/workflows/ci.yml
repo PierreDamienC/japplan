@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -17,6 +17,37 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          # Doit matcher kotlinOptions.jvmTarget dans android/app/build.gradle.
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: gradlew assembleDebug
+        working-directory: android
+        # gradlew n'est pas suivi comme exécutable dans git (le seul usage jusqu'ici
+        # était gradlew.bat en local sous Windows, voir deploy.ps1).
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: japplan-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
 
   trivy:
     runs-on: ubuntu-latest

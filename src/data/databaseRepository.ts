@@ -1,6 +1,6 @@
 import { Preferences } from '@capacitor/preferences'
 import { DriveFile } from '../plugins/DriveFile'
-import { migrateDatabase } from './migrations'
+import { CURRENT_SCHEMA_VERSION, migrateDatabase } from './migrations'
 import type { Database, Trip } from '../types/trip'
 
 const URI_KEY = 'databaseFileUri'
@@ -10,6 +10,7 @@ export class NoFileSelectedError extends Error {}
 export class AccessRevokedError extends Error {}
 export class ParseError extends Error {}
 export class ReadError extends Error {}
+export class SchemaTooNewError extends Error {}
 
 export interface ConnectedFile {
   uri: string
@@ -63,6 +64,17 @@ async function readDatabaseContent(file: ConnectedFile): Promise<{ database: Dat
 
   if (!isDatabase(parsed)) {
     throw new ParseError('Le fichier ne contient pas une base de voyages valide.')
+  }
+
+  // Sens inverse de migrateDatabase (qui gère les fichiers plus vieux que ce build) :
+  // un fichier déjà migré par un build plus récent de l'app ne doit surtout pas être
+  // interprété silencieusement avec la forme courante, sous peine de mal lire un champ
+  // renommé/changé — on bloque explicitement plutôt que de laisser migrateDatabase (qui
+  // ne sait que monter en version) le traiter comme déjà à jour.
+  if (parsed.schemaVersion !== undefined && parsed.schemaVersion > CURRENT_SCHEMA_VERSION) {
+    throw new SchemaTooNewError(
+      'Cette base a été mise à jour par une version plus récente de Japplan — mets à jour l’app avant de continuer.',
+    )
   }
 
   // Appliqué à chaque lecture distante (chargement initial, rebase d'écriture,

@@ -1555,6 +1555,11 @@
   line-height: 1.4;
 }
 
+.settings-version {
+  text-align: center;
+  padding-top: 4px;
+}
+
 /* Filtres de la carte */
 
 .map-filter-modal__section {
