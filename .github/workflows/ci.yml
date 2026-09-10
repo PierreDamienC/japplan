@@ -39,10 +39,13 @@ jobs:
       - name: gradlew assembleDebug
         working-directory: android
         # gradlew n'est pas suivi comme exécutable dans git (le seul usage jusqu'ici
-        # était gradlew.bat en local sous Windows, voir deploy.ps1).
+        # était gradlew.bat en local sous Windows, voir deploy.ps1). org.gradle.java.home
+        # dans gradle.properties pointe le JBR d'Android Studio en local (chemin Windows,
+        # voir CLAUDE.md) — inexistant sur ce runner Linux, donc on le surcharge en ligne
+        # de commande avec le JDK installé par setup-java ci-dessus (priorité sur le fichier).
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug -Dorg.gradle.java.home="$JAVA_HOME"
       - uses: actions/upload-artifact@v4
         with:
           name: japplan-debug-apk
