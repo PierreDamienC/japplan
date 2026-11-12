@@ -66,9 +66,11 @@ export default function ActivityPickerModal({ activities, date, onSelect, onClos
             disabled={submittingId !== null}
           >
             <span className="activity-picker-modal__name">{activity.name}</span>
-            <Chip as="span" tone="category" category={activity.category} active>
-              {categoryLabels[activity.category]}
-            </Chip>
+            {activity.categories.map((c) => (
+              <Chip key={c} as="span" tone="category" category={c} active>
+                {categoryLabels[c]}
+              </Chip>
+            ))}
             {activity.date && activity.date !== date && (
               <span className="activity-picker-modal__current">Déjà le {formatDayLabel(activity.date)}</span>
             )}

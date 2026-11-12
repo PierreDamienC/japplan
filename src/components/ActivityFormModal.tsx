@@ -5,6 +5,7 @@ import CoordinatesField from './CoordinatesField'
 import Sheet from './ui/Sheet'
 import Field from './ui/Field'
 import Button from './ui/Button'
+import Chip from './ui/Chip'
 
 interface ActivityFormModalProps {
   mode: 'create' | 'edit'
@@ -16,7 +17,7 @@ interface ActivityFormModalProps {
 
 export default function ActivityFormModal({ mode, activity, stages, onSubmit, onClose }: ActivityFormModalProps) {
   const [name, setName] = useState(activity?.name ?? '')
-  const [category, setCategory] = useState<ActivityCategory>(activity?.category ?? CATEGORIES[0])
+  const [categories, setCategories] = useState<ActivityCategory[]>(activity?.categories ?? [CATEGORIES[0]])
   const [stageId, setStageId] = useState(activity?.stageId ?? '')
   const [stageGroup, setStageGroup] = useState(activity?.stageGroup ?? '')
   const [mapsUrl, setMapsUrl] = useState(activity?.mapsUrl ?? '')
@@ -28,6 +29,11 @@ export default function ActivityFormModal({ mode, activity, stages, onSubmit, on
   const [lng, setLng] = useState(activity?.coordinates ? String(activity.coordinates.lng) : '')
   const [error, setError] = useState<string>()
   const [submitting, setSubmitting] = useState(false)
+
+  // L'ordre de sélection est conservé : la première cochée reste la principale.
+  function toggleCategory(c: ActivityCategory) {
+    setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
+  }
 
   function handleStageChange(newStageId: string) {
     setStageId(newStageId)
@@ -42,6 +48,7 @@ export default function ActivityFormModal({ mode, activity, stages, onSubmit, on
     setError(undefined)
 
     if (!name.trim()) return setError('Le nom est obligatoire.')
+    if (categories.length === 0) return setError('Choisis au moins une catégorie.')
     if (!mapsUrl.trim().startsWith('http')) return setError('Le lien Google Maps doit être une URL valide.')
     if (!stageGroup.trim()) return setError("L'étape (groupe d'affichage) est obligatoire.")
     if ((lat.trim() === '') !== (lng.trim() === '')) {
@@ -59,7 +66,7 @@ export default function ActivityFormModal({ mode, activity, stages, onSubmit, on
     try {
       await onSubmit({
         name: name.trim(),
-        category,
+        categories,
         stageGroup: stageGroup.trim(),
         stageId: stageId || undefined,
         mapsUrl: mapsUrl.trim(),
@@ -100,14 +107,14 @@ export default function ActivityFormModal({ mode, activity, stages, onSubmit, on
         <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
       </Field>
 
-      <Field label="Catégorie">
-        <select value={category} onChange={(e) => setCategory(e.target.value as ActivityCategory)}>
+      <Field as="div" label="Catégories" hint="La première choisie donne la couleur de l'activité.">
+        <div className="activity-form__categories">
           {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
+            <Chip key={c} tone="category" category={c} active={categories.includes(c)} onClick={() => toggleCategory(c)}>
               {categoryLabels[c]}
-            </option>
+            </Chip>
           ))}
-        </select>
+        </div>
       </Field>
 
       <Field label="Étape">

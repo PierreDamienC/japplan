@@ -66,6 +66,7 @@
   --cat-point_of_interest: #3f7a56;
   --cat-hike: #1f6f73;
   --cat-cycling: #a6417a;
+  --cat-souvenir: #9a7b0a;
 
   --transport-shinkansen: #c8442e;
   --transport-train: #3f7a56;
@@ -182,6 +183,7 @@
     --cat-point_of_interest: #79ae8c;
     --cat-hike: #63adb1;
     --cat-cycling: #d57fae;
+    --cat-souvenir: #d4b44a;
 
     --transport-shinkansen: #e4674d;
     --transport-train: #79ae8c;
@@ -244,6 +246,7 @@
   --cat-point_of_interest: #79ae8c;
   --cat-hike: #63adb1;
   --cat-cycling: #d57fae;
+  --cat-souvenir: #d4b44a;
 
   --transport-shinkansen: #e4674d;
   --transport-train: #79ae8c;

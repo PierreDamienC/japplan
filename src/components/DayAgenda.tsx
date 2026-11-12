@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import type { Activity } from '../types/trip'
 import ActivityCard from './ActivityCard'
+import { primaryCategory } from '../theme/categories'
 
 interface DayAgendaProps {
   activities: Activity[]
@@ -96,7 +97,7 @@ export default function DayAgenda({
           <div
             key={activity.id}
             className="day-agenda__span"
-            style={{ top: span.top, height: span.height, background: `var(--cat-${activity.category})` }}
+            style={{ top: span.top, height: span.height, background: `var(--cat-${primaryCategory(activity)})` }}
           />
         ) : null,
       )}
@@ -104,7 +105,7 @@ export default function DayAgenda({
         <div
           key={activity.id}
           className="day-agenda__entry"
-          style={{ top, '--card-rail': `var(--cat-${activity.category})` } as CSSProperties}
+          style={{ top, '--card-rail': `var(--cat-${primaryCategory(activity)})` } as CSSProperties}
         >
           <span className="day-agenda__dot" />
           <ActivityCard

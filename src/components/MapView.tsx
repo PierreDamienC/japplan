@@ -105,11 +105,14 @@ function makeAccommodationMarkerEl() {
 
 // --marker-color pilote la couleur (theme/categories.ts écrit --cat-* sur
 // <html>) : une seule règle CSS .activity-marker pour les 6 catégories, qui
-// se recolore seule au changement de thème sans code supplémentaire.
-function makeActivityMarkerEl(category: ActivityCategory) {
+// se recolore seule au changement de thème sans code supplémentaire. Une
+// activité multi-catégories a un pin bicolore (principale + deuxième).
+function makeActivityMarkerEl(categories: ActivityCategory[]) {
   const el = document.createElement('div')
   el.className = 'activity-marker'
-  el.style.setProperty('--marker-color', `var(--cat-${category})`)
+  const [first = 'point_of_interest', second] = categories
+  el.style.setProperty('--marker-color', `var(--cat-${first})`)
+  if (second) el.style.setProperty('--marker-color-2', `var(--cat-${second})`)
   return el
 }
 
@@ -386,7 +389,7 @@ export default function MapView({
     ;(trip.activities ?? [])
       .filter((activity) => activity.coordinates)
       .forEach((activity) => {
-        const marker = new maplibregl.Marker({ element: makeActivityMarkerEl(activity.category) })
+        const marker = new maplibregl.Marker({ element: makeActivityMarkerEl(activity.categories) })
           .setLngLat([activity.coordinates!.lng, activity.coordinates!.lat])
           .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(activityPopupHtml(activity, wishlistLabel)))
           .addTo(map)
@@ -521,7 +524,7 @@ export default function MapView({
       if (!marker) return
       const show = quickFilterActive
         ? (!wishlistOnly || Boolean(activity.wishlist)) && (!plannedOnly || Boolean(activity.date))
-        : visibleCategories.has(activity.category)
+        : activity.categories.some((c) => visibleCategories.has(c))
       marker.getElement().style.display = show ? '' : 'none'
       marker.getElement().classList.toggle('activity-marker--wishlist', wishlistOnly && Boolean(activity.wishlist))
     })
@@ -545,7 +548,7 @@ export default function MapView({
     let planned = 0
     ;(trip.activities ?? []).forEach((a) => {
       if (!a.coordinates) return
-      counts[a.category]++
+      a.categories.forEach((c) => counts[c]++)
       if (a.wishlist) wishlist++
       if (a.date) planned++
     })

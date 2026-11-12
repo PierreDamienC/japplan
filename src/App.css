@@ -727,7 +727,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--marker-color);
+  background: linear-gradient(90deg, var(--marker-color) 50%, var(--marker-color-2, var(--marker-color)) 50%);
   box-shadow: var(--elev-marker), 0 1px 4px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
@@ -1208,6 +1208,15 @@
   gap: var(--sp-2);
 }
 
+.activity-card__categories {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  max-width: 50%;
+}
+
 .activity-card__done-icon {
   color: var(--matcha);
   flex-shrink: 0;
@@ -1516,6 +1525,12 @@
   color: var(--text-h);
   font-size: 13px;
   cursor: pointer;
+}
+
+.activity-form__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
 }
 
 .coordinates-field__hint {

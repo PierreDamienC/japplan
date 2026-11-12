@@ -14,9 +14,16 @@ export const categoryLabels: Record<ActivityCategory, string> = {
   point_of_interest: "Lieu d'intérêt",
   hike: 'Randonnée',
   cycling: 'Vélo',
+  souvenir: 'Souvenirs',
 }
 
 export const ALL_CATEGORIES = Object.keys(categoryLabels) as ActivityCategory[]
+
+// Repli défensif si une activité arrive sans catégorie (saisie manuelle dans
+// le JSON) : mieux vaut une couleur neutre-ish qu'un var(--cat-undefined).
+export function primaryCategory(activity: { categories: ActivityCategory[] }): ActivityCategory {
+  return activity.categories[0] ?? 'point_of_interest'
+}
 
 export const CATEGORY_COLORS: Record<ActivityCategory, Record<ResolvedTheme, string>> = {
   restaurant: { light: '#C8442E', dark: '#E4674D' },
@@ -25,6 +32,7 @@ export const CATEGORY_COLORS: Record<ActivityCategory, Record<ResolvedTheme, str
   point_of_interest: { light: '#3F7A56', dark: '#79AE8C' },
   hike: { light: '#1F6F73', dark: '#63ADB1' },
   cycling: { light: '#A6417A', dark: '#D57FAE' },
+  souvenir: { light: '#9A7B0A', dark: '#D4B44A' },
 }
 
 export const TRANSPORT_COLORS: Record<TransportMode, Record<ResolvedTheme, string>> = {

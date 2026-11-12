@@ -80,7 +80,7 @@ export default function ActivitiesView({
       let filtered =
         exclude === 'category' || activeCategories.size === 0
           ? activities
-          : activities.filter((a) => activeCategories.has(a.category))
+          : activities.filter((a) => a.categories.some((c) => activeCategories.has(c)))
 
       if (exclude !== 'stage' && stageFilter) {
         filtered = filtered.filter((a) => a.stageId === stageFilter)
@@ -108,7 +108,7 @@ export default function ActivitiesView({
 
   const categoryCounts = useMemo(() => {
     const counts = Object.fromEntries(ALL_CATEGORIES.map((c) => [c, 0])) as Record<ActivityCategory, number>
-    applyFilters(trip.activities ?? [], 'category').forEach((a) => counts[a.category]++)
+    applyFilters(trip.activities ?? [], 'category').forEach((a) => a.categories.forEach((c) => counts[c]++))
     return counts
   }, [trip, applyFilters])
 

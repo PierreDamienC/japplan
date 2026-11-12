@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, MouseEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { DEFAULT_WISHLIST_STAMP_LABEL, type Activity } from '../types/trip'
-import { categoryLabels } from '../theme/categories'
+import { categoryLabels, primaryCategory } from '../theme/categories'
 import { formatDayLabel } from '../utils/formatDate'
 import Icon from './ui/Icon'
 import Button from './ui/Button'
@@ -171,7 +171,7 @@ export default function ActivityCard({
   // inline car la catégorie est dynamique (6 valeurs). Le transform de swipe
   // reste géré à part, inline aussi — ne jamais lui ajouter de `transition`
   // en CSS, elle est pilotée ici pour pouvoir être coupée pendant le drag.
-  const cardStyle: CSSProperties = { '--card-rail': `var(--cat-${activity.category})` } as CSSProperties
+  const cardStyle: CSSProperties = { '--card-rail': `var(--cat-${primaryCategory(activity)})` } as CSSProperties
   if (swipeable) {
     cardStyle.transform = `translateX(${swipeTranslate}px)`
     cardStyle.transition = swipeDragging ? 'none' : 'transform var(--dur-base) var(--ease-standard)'
@@ -216,9 +216,13 @@ export default function ActivityCard({
         {activity.done && <Icon name="check" size={14} className="activity-card__done-icon" />}
         <span className="activity-card__name">{activity.name}</span>
         {activity.rating && <span className="activity-card__rating">{activity.rating}</span>}
-        <Chip as="span" tone="category" category={activity.category} active>
-          {categoryLabels[activity.category]}
-        </Chip>
+        <span className="activity-card__categories">
+          {activity.categories.map((c) => (
+            <Chip key={c} as="span" tone="category" category={c} active>
+              {categoryLabels[c]}
+            </Chip>
+          ))}
+        </span>
       </div>
       {!compact && activity.hours && <div className="activity-card__hours">{activity.hours}</div>}
       {!compact && activity.notes && <p className="activity-card__notes">{renderNotes(activity.notes)}</p>}

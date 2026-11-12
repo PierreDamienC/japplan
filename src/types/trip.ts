@@ -22,7 +22,7 @@ export interface Excursion {
   mode?: TransportMode
 }
 
-export type ActivityCategory = 'restaurant' | 'museum' | 'shop' | 'point_of_interest' | 'hike' | 'cycling'
+export type ActivityCategory = 'restaurant' | 'museum' | 'shop' | 'point_of_interest' | 'hike' | 'cycling' | 'souvenir'
 
 // Activités/restaurants/musées etc. — imbriquées dans leur Trip, chargées à
 // l'exécution depuis la base JSON partagée sur Google Drive (voir
@@ -34,7 +34,9 @@ export interface Activity {
   name: string
   stageGroup: string // groupe d'affichage tel que fourni dans la source, ex "Tokyo (1er séjour)"
   stageId?: string // étape correspondante quand elle est identifiable
-  category: ActivityCategory
+  // Jamais vide. La première est la catégorie principale : elle seule donne la
+  // couleur (filet de carte, segment de frise) ; les filtres matchent sur toutes.
+  categories: ActivityCategory[]
   mapsUrl: string
   hours?: string
   notes?: string
@@ -111,7 +113,7 @@ export const DEFAULT_WISHLIST_STAMP_LABEL = 'Wishlist'
 // activités imbriqués), pas de clé étrangère entre trips.
 //
 // `schemaVersion` absent = fichier jamais passé par le pipeline de migration
-// (src/data/migrations.ts), traité comme la version courante au chargement —
+// (src/data/migrations.ts), traité comme la version 1 au chargement —
 // voir ce fichier pour la logique de migration.
 export interface Database {
   trips: Trip[]
