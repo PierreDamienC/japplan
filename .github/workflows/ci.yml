@@ -38,6 +38,10 @@ jobs:
           # Doit matcher kotlinOptions.jvmTarget dans android/app/build.gradle.
           java-version: '21'
       - uses: android-actions/setup-android@v3
+        with:
+          # Le défaut ('tools platform-tools') casse depuis cmdline-tools 16.0 : le
+          # paquet SDK 'tools' n'existe plus et sdkmanager sort en erreur.
+          packages: 'platform-tools'
       - uses: gradle/actions/setup-gradle@v4
       - name: gradlew assembleDebug
         working-directory: android
