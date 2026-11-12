@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Resource, Trip } from '../types/trip'
 import ResourceFormModal from './ResourceFormModal'
+import CurrencyConverter from './CurrencyConverter'
 import Icon from './ui/Icon'
 import Button from './ui/Button'
 
@@ -58,6 +59,13 @@ export default function ResourcesView({ trip, onAddResource, onUpdateResource, o
   return (
     <div className="resources">
       <div className="resources__list">
+        <section className="activities__group">
+          <h2 className="activities__group-title">
+            <span>Conversion</span>
+          </h2>
+          <CurrencyConverter />
+        </section>
+
         {resources.length === 0 && <p className="activities__empty">Aucune ressource pour l'instant.</p>}
 
         {generic.length > 0 && (
